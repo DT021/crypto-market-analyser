@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.TableView?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.TableScreenController"
+            prefHeight="600.0" prefWidth="800.0">
+
+    <TableView fx:id="dataTable" layoutX="150.0" layoutY="40" prefHeight="650.0" prefWidth="1125.0">
+        <columns>
+            <TableColumn fx:id="average" prefWidth="160" text="Average" />
+            <TableColumn fx:id="min" prefWidth="160" text="Min" />
+            <TableColumn fx:id="max" prefWidth="160" text="Max" />
+            <TableColumn fx:id="change" prefWidth="160" text="Change" />
+            <TableColumn fx:id="volume" prefWidth="160" text="Volume" />
+            <TableColumn fx:id="standardDeviation" prefWidth="160" text="Standard Deviation" />
+        </columns>
+    </TableView>
+
+    <ChoiceBox fx:id="timeRange" layoutY="40" layoutX="20" prefWidth="100" />
+    <Button fx:id="calculateButton" layoutY="90" layoutX="20" prefWidth="100" text="Calculate" />
+
+</AnchorPane>
