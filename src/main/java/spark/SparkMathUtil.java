@@ -119,8 +119,6 @@ public class SparkMathUtil extends BasicSpark{
             changes.add(currentPriceIterator.next().getValue() / oldPriceIterator.next().getValue());
         }
 
-        System.out.println(changes.toString() + " - " + currentPrices.count() + " - " + aDayBeforePrices.count());
-
         return dataFormatUtil.getIntegerDoubleJavaPairRDD(keys, changes, APP_NAME, LOCAL_IP);
     }
 

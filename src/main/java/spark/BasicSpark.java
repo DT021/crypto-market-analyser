@@ -51,7 +51,7 @@ public class BasicSpark implements Serializable {
             JavaPairRDD<Integer, Double> dailyMinValues = mathUtil.getMin(groupedData, true);
             JavaPairRDD<Integer, Double> dailyMaxValues = mathUtil.getMax(groupedData, true);
             JavaPairRDD<Integer, Double> dailyChange = mathUtil.getChange(groupedData, true);
-            JavaPairRDD<Integer, Double> monthlySd = mathUtil.getStandardDeviation(groupedData, false);
+            JavaPairRDD<Integer, Double> dailySd = mathUtil.getStandardDeviation(groupedData, true);
             JavaPairRDD<Integer, Double> baseVolume = mathUtil.getVolume(groupedData, true);
             JavaPairRDD<Integer, Double> quoteVolume = mathUtil.getVolume(groupedData, false);
             JavaPairRDD<Integer, Double> dailyAverageValues = mathUtil.getAverage(groupedData, true);
@@ -62,8 +62,9 @@ public class BasicSpark implements Serializable {
             JavaPairRDD<Integer, Double> baseVolume = mathUtil.getVolume(groupedData, true);
             JavaPairRDD<Integer, Double> quoteVolume = mathUtil.getVolume(groupedData, false);
             JavaPairRDD<Integer, Double> monthlyChange = mathUtil.getChange(groupedData, false);
-            JavaPairRDD<Integer, Double> dailySd = mathUtil.getStandardDeviation(groupedData, true);
+            JavaPairRDD<Integer, Double> monthlySd = mathUtil.getStandardDeviation(groupedData, false);
         }
+
 
         return data;
     }
@@ -109,7 +110,6 @@ public class BasicSpark implements Serializable {
         };
 
         JavaPairRDD<Integer, CurrencyPairPrice> filteredData = rdd.filter(filter);
-        System.out.println("fltrd: " + filteredData.count());
         return filteredData;
     }
 

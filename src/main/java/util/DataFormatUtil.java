@@ -131,14 +131,15 @@ public class DataFormatUtil implements Serializable {
 
         if(keys.size() > 0 && changes.size() > 0){
             for(int i=0; i<keys.size(); i++){
-                new Tuple2<Integer, Double>(keys.get(i), changes.get(i));
+                tupleToJavaPairRDD.add(new Tuple2<Integer, Double>(keys.get(i), changes.get(i)));
             }
         }
 
         SparkConf conf = new SparkConf().setAppName(APP_NAME).setMaster(IP);
         JavaSparkContext sc = JavaSparkContext.fromSparkContext(SparkContext.getOrCreate(conf));
 
-        return sc.parallelizePairs(tupleToJavaPairRDD);
+        JavaPairRDD<Integer, Double> javaPairRDD = sc.parallelizePairs(tupleToJavaPairRDD);
+        return javaPairRDD;
     }
 
     public JavaPairRDD<Integer, Double> objectToDouble(JavaPairRDD<Integer, CurrencyPairPrice> data, String APP_NAME, String IP){
