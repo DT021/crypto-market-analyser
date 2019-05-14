@@ -16,12 +16,14 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class BasicSpark implements Serializable {
 
     protected Integer PARTITION_COUNT = 2;
     protected String APP_NAME = "Crypto Analyser";
-    protected String LOCAL_IP = "local";
+    protected String LOCAL_IP = "spark://192.168.1.124:7077";
     protected String CUSTOM_IP = "spark://192.168.1.124:7077";
     protected DataFormatUtil dataFormatUtil;
 
@@ -51,22 +53,53 @@ public class BasicSpark implements Serializable {
             JavaPairRDD<Integer, Double> dailyMinValues = mathUtil.getMin(groupedData, true);
             JavaPairRDD<Integer, Double> dailyMaxValues = mathUtil.getMax(groupedData, true);
             JavaPairRDD<Integer, Double> dailyChange = mathUtil.getChange(groupedData, true);
-            JavaPairRDD<Integer, Double> dailySd = mathUtil.getStandardDeviation(groupedData, true);
-            JavaPairRDD<Integer, Double> baseVolume = mathUtil.getVolume(groupedData, true);
-            JavaPairRDD<Integer, Double> quoteVolume = mathUtil.getVolume(groupedData, false);
+            JavaPairRDD<Integer, Double> dailySd = mathUtil.getStandardDeviations(groupedData, true);
+            JavaPairRDD<Integer, Double> baseVolume = mathUtil.getVolume(groupedData, true, true);
+            JavaPairRDD<Integer, Double> quoteVolume = mathUtil.getVolume(groupedData, false, true);
             JavaPairRDD<Integer, Double> dailyAverageValues = mathUtil.getAverage(groupedData, true);
+
+            extractDataAsList(data, dailyMinValues, dailyMaxValues, dailyChange, dailySd, baseVolume, quoteVolume, dailyAverageValues);
         }else {
             JavaPairRDD<Integer, Double> monthlyMinValues = mathUtil.getMin(groupedData, false);
             JavaPairRDD<Integer, Double> monthlyMaxValues = mathUtil.getMax(groupedData, false);
             JavaPairRDD<Integer, Double> monthlyAverageValues = mathUtil.getAverage(groupedData, false);
-            JavaPairRDD<Integer, Double> baseVolume = mathUtil.getVolume(groupedData, true);
-            JavaPairRDD<Integer, Double> quoteVolume = mathUtil.getVolume(groupedData, false);
+            JavaPairRDD<Integer, Double> baseVolume = mathUtil.getVolume(groupedData, true, false);
+            JavaPairRDD<Integer, Double> quoteVolume = mathUtil.getVolume(groupedData, false, false);
             JavaPairRDD<Integer, Double> monthlyChange = mathUtil.getChange(groupedData, false);
-            JavaPairRDD<Integer, Double> monthlySd = mathUtil.getStandardDeviation(groupedData, false);
+            JavaPairRDD<Integer, Double> monthlySd = mathUtil.getStandardDeviations(groupedData, false);
+
+            extractDataAsList(data, monthlyMinValues, monthlyMaxValues, monthlyChange, monthlySd, baseVolume, quoteVolume, monthlyAverageValues);
         }
 
 
         return data;
+    }
+
+    private void extractDataAsList(ArrayList<CurrencyPair> data, JavaPairRDD<Integer, Double> dailyMinValues, JavaPairRDD<Integer, Double> dailyMaxValues, JavaPairRDD<Integer, Double> dailyChange, JavaPairRDD<Integer, Double> dailySd, JavaPairRDD<Integer, Double> baseVolume, JavaPairRDD<Integer, Double> quoteVolume, JavaPairRDD<Integer, Double> dailyAverageValues) {
+        HashMap<Integer, Double> min = dataFormatUtil.extractAsMap(dailyMinValues);
+        HashMap<Integer, Double> max = dataFormatUtil.extractAsMap(dailyMaxValues);
+        HashMap<Integer, Double> avg = dataFormatUtil.extractAsMap(dailyAverageValues);
+        HashMap<Integer, Double> bVolume = dataFormatUtil.extractAsMap(baseVolume);
+        HashMap<Integer, Double> qVolume = dataFormatUtil.extractAsMap(quoteVolume);
+        HashMap<Integer, Double> change = dataFormatUtil.extractAsMap(dailyChange);
+        HashMap<Integer, Double> sd = dataFormatUtil.extractAsMap(dailySd);
+
+        Iterator<Integer> keyIterator = min.keySet().iterator();
+        while (keyIterator.hasNext()){
+            int key = keyIterator.next();
+
+            CurrencyPair currencyPair = new CurrencyPair();
+            currencyPair.setId(key);
+            currencyPair.setMin(min.get(key));
+            currencyPair.setMax(max.get(key));
+            currencyPair.setAverage(avg.get(key));
+            currencyPair.setBaseVolume(bVolume.get(key));
+            currencyPair.setQuoteVolume(qVolume.get(key));
+            currencyPair.setChange(change.get(key));
+            currencyPair.setStandardDeviation(sd.get(key));
+
+            data.add(currencyPair);
+        }
     }
 
     public JavaRDD<CurrencyPairPrice> readDataFile(String path){

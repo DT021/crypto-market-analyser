@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import spark.BasicSpark;
 
 import java.net.URL;
@@ -22,11 +23,13 @@ public class TableScreenController implements Initializable {
 
     @FXML ChoiceBox timeRange;
 
+    @FXML TableColumn id;
     @FXML TableColumn average;
     @FXML TableColumn min;
     @FXML TableColumn max;
     @FXML TableColumn change;
-    @FXML TableColumn volume;
+    @FXML TableColumn baseVolume;
+    @FXML TableColumn quoteVolume;
     @FXML TableColumn standardDeviation;
 
     @FXML Button calculateButton;
@@ -42,6 +45,8 @@ public class TableScreenController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         timeRange.setItems(FXCollections.observableArrayList("Daily", "Monthly"));
         basicSpark = new BasicSpark();
+
+        arrangeColumnTypes();
 
         timeRange.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -59,11 +64,48 @@ public class TableScreenController implements Initializable {
             public void handle(ActionEvent event) {
                 try {
                     data = FXCollections.observableArrayList(basicSpark.getWholeData(isDailyChoosen, dataFilePath));
+                    dataTable.setItems(data);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
             }
         });
+
+    }
+
+    public void arrangeColumnTypes(){
+
+        id.setCellValueFactory(
+                new PropertyValueFactory<CurrencyPair, Integer>("id")
+        );
+
+        min.setCellValueFactory(
+                new PropertyValueFactory<CurrencyPair, Double>("min")
+        );
+
+        max.setCellValueFactory(
+                new PropertyValueFactory<CurrencyPair, Double>("max")
+        );
+
+        average.setCellValueFactory(
+                new PropertyValueFactory<CurrencyPair, Double>("average")
+        );
+
+        baseVolume.setCellValueFactory(
+                new PropertyValueFactory<CurrencyPair, Double>("baseVolume")
+        );
+
+        quoteVolume.setCellValueFactory(
+                new PropertyValueFactory<CurrencyPair, Double>("quoteVolume")
+        );
+
+        change.setCellValueFactory(
+                new PropertyValueFactory<CurrencyPair, Double>("change")
+        );
+
+        standardDeviation.setCellValueFactory(
+                new PropertyValueFactory<CurrencyPair, Double>("standardDeviation")
+        );
 
     }
 
@@ -100,12 +142,15 @@ public class TableScreenController implements Initializable {
                 ", min=" + min +
                 ", max=" + max +
                 ", change=" + change +
-                ", volume=" + volume +
+                ", baseVolume=" + baseVolume +
+                ", quoteVolume=" + quoteVolume +
                 ", standardDeviation=" + standardDeviation +
+                ", calculateButton=" + calculateButton +
                 ", basicSpark=" + basicSpark +
                 ", data=" + data +
                 ", dataFilePath='" + dataFilePath + '\'' +
                 ", isDailyChoosen=" + isDailyChoosen +
                 '}';
     }
+
 }

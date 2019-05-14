@@ -9,14 +9,16 @@
             fx:controller="controller.TableScreenController"
             prefHeight="600.0" prefWidth="800.0">
 
-    <TableView fx:id="dataTable" layoutX="150.0" layoutY="40" prefHeight="650.0" prefWidth="1125.0">
+    <TableView fx:id="dataTable" layoutX="150.0" layoutY="40" prefHeight="650.0" prefWidth="1095.0">
         <columns>
-            <TableColumn fx:id="average" prefWidth="160" text="Average" />
-            <TableColumn fx:id="min" prefWidth="160" text="Min" />
-            <TableColumn fx:id="max" prefWidth="160" text="Max" />
-            <TableColumn fx:id="change" prefWidth="160" text="Change" />
-            <TableColumn fx:id="volume" prefWidth="160" text="Volume" />
-            <TableColumn fx:id="standardDeviation" prefWidth="160" text="Standard Deviation" />
+            <TableColumn fx:id="id" prefWidth="135" text="Currency Pair ID" style="-fx-alignment: center" />
+            <TableColumn fx:id="average" prefWidth="135" text="Average" style="-fx-alignment: center" />
+            <TableColumn fx:id="min" prefWidth="135" text="Min" style="-fx-alignment: center" />
+            <TableColumn fx:id="max" prefWidth="135" text="Max" style="-fx-alignment: center" />
+            <TableColumn fx:id="change" prefWidth="135" text="Change" style="-fx-alignment: center" />
+            <TableColumn fx:id="baseVolume" prefWidth="135" text="Base Volume" style="-fx-alignment: center" />
+            <TableColumn fx:id="quoteVolume" prefWidth="135" text="Quote Volume" style="-fx-alignment: center" />
+            <TableColumn fx:id="standardDeviation" prefWidth="150" text="Standard Deviation" style="-fx-alignment: center" />
         </columns>
     </TableView>
 

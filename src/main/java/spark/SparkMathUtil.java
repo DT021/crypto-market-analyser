@@ -69,7 +69,6 @@ public class SparkMathUtil extends BasicSpark{
                     }
                 };
 
-        AvgCount initial = new AvgCount(0,0);
         JavaPairRDD<Integer, AvgCount> avgCounts =
                 doubleJavaPairRDD.combineByKey(createAcc, addAndCount, combine);
 
@@ -79,10 +78,16 @@ public class SparkMathUtil extends BasicSpark{
         return sumValues;
     }
 
-    public JavaPairRDD<Integer, Double> getVolume(JavaPairRDD<Integer, Iterable<CurrencyPairPrice>> data, boolean isBaseVolume){
+    public JavaPairRDD<Integer, Double> getVolume(JavaPairRDD<Integer, Iterable<CurrencyPairPrice>> data, boolean isBaseVolume, boolean isDaily){
         JavaPairRDD<Integer, CurrencyPairPrice> values = this.dataFormatUtil.getDataAsObjectPair(data, APP_NAME, LOCAL_IP);
+        JavaPairRDD<Integer, CurrencyPairPrice> filteredValues = null;
+        if(isDaily){
+            filteredValues = filterData(values, Calendar.DAY_OF_MONTH, -1);
+        }else {
+            filteredValues = filterData(values, Calendar.MONTH, -1);
+        }
 
-        JavaPairRDD<Integer, CurrencyPairPrice> reducedvaleus = dataFormatUtil.getCurrentValues(values);
+        JavaPairRDD<Integer, CurrencyPairPrice> reducedvaleus = dataFormatUtil.getCurrentValues(filteredValues);
 
         ArrayList<Integer> keys = new ArrayList<>();
         ArrayList<Double> volumes = new ArrayList<>();
@@ -107,7 +112,6 @@ public class SparkMathUtil extends BasicSpark{
         JavaPairRDD<Integer, CurrencyPairPrice> values = this.dataFormatUtil.getDataAsObjectPair(data, APP_NAME, LOCAL_IP);
 
         JavaPairRDD<Integer, CurrencyPairPrice> currentPrices = dataFormatUtil.getCurrentValues(values);
-        JavaPairRDD<Integer, CurrencyPairPrice> filteredData = filterData(values, (isDaily ? Calendar.DAY_OF_MONTH : Calendar.MONTH), -3);
         JavaPairRDD<Integer, CurrencyPairPrice> aDayBeforePrices = dataFormatUtil.getOldestValues(filterData(values, (isDaily ? Calendar.DAY_OF_MONTH : Calendar.MONTH), -1));
 
         Iterator<CurrencyPairPrice> currentPriceIterator = currentPrices.values().toLocalIterator();
@@ -116,25 +120,32 @@ public class SparkMathUtil extends BasicSpark{
         ArrayList<Integer> keys = dataFormatUtil.extractKeys(currentPrices);
         ArrayList<Double> changes = new ArrayList<>();
         while (currentPriceIterator.hasNext() && oldPriceIterator.hasNext()){
-            changes.add(currentPriceIterator.next().getValue() / oldPriceIterator.next().getValue());
+            double currentPrice = currentPriceIterator.next().getValue();
+            double oldPrice = oldPriceIterator.next().getValue();
+            changes.add(oldPrice != 0 ? currentPrice / oldPrice : 0);
         }
 
         return dataFormatUtil.getIntegerDoubleJavaPairRDD(keys, changes, APP_NAME, LOCAL_IP);
     }
 
-    public JavaPairRDD<Integer, Double> getStandardDeviation(JavaPairRDD<Integer, Iterable<CurrencyPairPrice>> originalData, boolean isDaily){
+    public JavaPairRDD<Integer, Double> getStandardDeviations(JavaPairRDD<Integer, Iterable<CurrencyPairPrice>> originalData, boolean isDaily){
 
         SparkConf conf = new SparkConf().setAppName(APP_NAME).setMaster(LOCAL_IP);
         JavaSparkContext sc = JavaSparkContext.fromSparkContext(SparkContext.getOrCreate(conf));
 
+        JavaPairRDD<Integer, CurrencyPairPrice> objectVersionOfData = dataFormatUtil.getDataAsObjectPair(originalData, APP_NAME, LOCAL_IP);
+        JavaPairRDD<Integer, CurrencyPairPrice> filteredData = null;
+        if(isDaily){
+            filteredData = filterData(objectVersionOfData, Calendar.DAY_OF_MONTH, -1);
+        }else {
+            filteredData = filterData(objectVersionOfData, Calendar.MONTH, -1);
+        }
+
         List<Tuple2<Integer, Double>> tupleToJavaPairRDD = new ArrayList<>();
-        Iterator<Tuple2<Integer, Iterable<CurrencyPairPrice>>> iterator = originalData.toLocalIterator();
+        Iterator<Tuple2<Integer, CurrencyPairPrice>> iterator = filteredData.toLocalIterator();
         while (iterator.hasNext()){
-            Tuple2<Integer, Iterable<CurrencyPairPrice>> value =  iterator.next();
-            Iterator<CurrencyPairPrice> priceIterator = value._2.iterator();
-            while (priceIterator.hasNext()){
-                tupleToJavaPairRDD.add(new Tuple2<Integer, Double>(value._1, priceIterator.next().getValue()));
-            }
+            Tuple2<Integer, CurrencyPairPrice> value =  iterator.next();
+            tupleToJavaPairRDD.add(new Tuple2<>(value._1, value._2.getValue()));
         }
 
         JavaPairRDD<Integer, Double> wholeData = sc.parallelizePairs(tupleToJavaPairRDD);
@@ -148,6 +159,13 @@ public class SparkMathUtil extends BasicSpark{
             keys.add(tuple._1);
             sdValues.add(tuple._2.stdev());
         }
+
+        // We can get averages with this method as well
+        /*while (sdIterator.hasNext()){
+            Tuple2<Integer, StatCounter> tuple = sdIterator.next();
+            keys.add(tuple._1);
+            sdValues.add(tuple._2.mean());
+        }*/
 
         return dataFormatUtil.getIntegerDoubleJavaPairRDD(keys, sdValues, APP_NAME, LOCAL_IP);
     }

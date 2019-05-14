@@ -10,6 +10,7 @@ import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -167,15 +168,17 @@ public class DataFormatUtil implements Serializable {
         return keys;
     }
 
-    public ArrayList<Double> extractValues(JavaPairRDD<Integer, CurrencyPairPrice> data){
-        ArrayList<Double> values = new ArrayList<>();
+    public HashMap<Integer, Double> extractAsMap(JavaPairRDD<Integer, Double> data){
+        HashMap<Integer, Double> map = new HashMap<Integer, Double>();
+        Iterator<Tuple2<Integer, Double>> iterator = data.toLocalIterator();
 
-        Iterator<CurrencyPairPrice> keyIterator = data.values().toLocalIterator();
-        while (keyIterator.hasNext()){
-            values.add(keyIterator.next().getValue());
+        while (iterator.hasNext()){
+            Tuple2<Integer, Double> tuple = iterator.next();
+            map.put(tuple._1, tuple._2);
         }
 
-        return values;
+        return map;
     }
+
 
 }

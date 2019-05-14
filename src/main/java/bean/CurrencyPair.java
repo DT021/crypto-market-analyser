@@ -2,23 +2,35 @@ package bean;
 
 public class CurrencyPair {
 
+    private Integer id;
     private double average;
     private double min;
     private double max;
     private double change;
-    private double volume;
+    private double baseVolume;
+    private double quoteVolume;
     private double standardDeviation;
 
     public CurrencyPair() {
     }
 
-    public CurrencyPair(double average, double min, double max, double change, double volume, double standardDeviation) {
+    public CurrencyPair(Integer id, double average, double min, double max, double change, double baseVolume, double quoteVolume, double standardDeviation) {
+        this.id = id;
         this.average = average;
         this.min = min;
         this.max = max;
         this.change = change;
-        this.volume = volume;
+        this.baseVolume = baseVolume;
+        this.quoteVolume = quoteVolume;
         this.standardDeviation = standardDeviation;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public double getAverage() {
@@ -53,12 +65,20 @@ public class CurrencyPair {
         this.change = change;
     }
 
-    public double getVolume() {
-        return volume;
+    public double getBaseVolume() {
+        return baseVolume;
     }
 
-    public void setVolume(double volume) {
-        this.volume = volume;
+    public void setBaseVolume(double baseVolume) {
+        this.baseVolume = baseVolume;
+    }
+
+    public double getQuoteVolume() {
+        return quoteVolume;
+    }
+
+    public void setQuoteVolume(double quoteVolume) {
+        this.quoteVolume = quoteVolume;
     }
 
     public double getStandardDeviation() {
@@ -72,11 +92,13 @@ public class CurrencyPair {
     @Override
     public String toString() {
         return "CurrencyPair{" +
-                "average=" + average +
+                "id=" + id +
+                ", average=" + average +
                 ", min=" + min +
                 ", max=" + max +
                 ", change=" + change +
-                ", volume=" + volume +
+                ", baseVolume=" + baseVolume +
+                ", quoteVolume=" + quoteVolume +
                 ", standardDeviation=" + standardDeviation +
                 '}';
     }
